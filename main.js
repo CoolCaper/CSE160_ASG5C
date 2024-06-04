@@ -38,13 +38,15 @@ const boxDepth = 1;
 
 const geometry = new THREE.BoxGeometry( boxWidth * 10, boxHeight * 10, boxDepth * 10);
 const circle = new THREE.SphereGeometry(20)
-const pentagon = new THREE.SphereGeometry()
-const knot = new THREE.TorusKnotGeometry()
-const octagon = new THREE.TorusGeometry()
-const sphere = new THREE.SphereGeometry(10)
-const decagon = new THREE.TubeGeometry()
-const dodecahedron = new THREE.RingGeometry()
-const lathe = new THREE.LatheGeometry()
+const wispObj = new THREE.SphereGeometry(1)
+const plane = new THREE.BoxGeometry(20, 4, 20);
+const pentagon = new THREE.SphereGeometry();
+const knot = new THREE.TorusKnotGeometry();
+const octagon = new THREE.TorusGeometry();
+const sphere = new THREE.SphereGeometry(10);
+const decagon = new THREE.TubeGeometry();
+const dodecahedron = new THREE.RingGeometry();
+const lathe = new THREE.LatheGeometry();
 lathe.scale.x = 3;
 lathe.scale.y = 3;
 console.log("lathe ", lathe)
@@ -85,7 +87,7 @@ const scales = new THREE.MeshBasicMaterial({
 })
 //make cylinder
 
-
+let spot = 0;
 
 {
 
@@ -111,7 +113,10 @@ camera.position.z = 3;
 const controls = new OrbitControls( camera, canvas );
 controls.target.set( 0, 0, 0 );
 
+let floor = makeInstance(plane, 0xFF0000, 50, 50, -70)
+
 const rug = makeInstance( circle, 0x44aa88, 50, null, -70);
+
     rug.scale.x = 3;
     rug.scale.z = 3;
     console.log(rug)
@@ -144,6 +149,7 @@ const cubes = [
     makeInstance( cylGeo, 0xbbbbbb, 100, null, -20, 75),    
     candle,
     rug,
+    floor,
     //10
     makeInstance( cylGeo, 0x8388bb, - 24, null, -10, 40 ),   
     makeInstance( flames, 0xbb0000, 48.25, null, -50, -70.75 ),
@@ -156,11 +162,17 @@ const cubes = [
     //yellow
     makeInstance( flames, 0xbbff00, 62, null, -50, -62.5 ),
     makeInstance( flames, 0xbbff00, 57, null, -50, -75 ),
-    makeInstance( fire, 0x836644, 55, null, -60, -65)
+    makeInstance( fire, 0x836644, 55, null, -60, -65),
+    makeInstance( wispObj, 0x836644, 0, null, 20, 60)
+    
+    //makeInstance( flames, 0xbb0000, -40, null, 0, -15 )
 ];
-console.log(cubes.length)
-function main() {
+let spotLight;
+let spotlightTarget;
 
+let spotLightHelper;
+let wisp;
+function main() {
 	controls.update();
 
     	//fish! fish, fish, fish
@@ -188,8 +200,8 @@ function main() {
     }
 
 	{
-		const color = 0xFFFFFF;
-		const intensity = 3;		
+		const color = 0x00FFFF;
+		const intensity = 1;		
 		const light = new THREE.AmbientLight( color, intensity );
 		light.position.set( - 1, 2, 4 );		
 		scene.add( light );
@@ -206,13 +218,52 @@ function main() {
     
 
 	{
-		const color = 0xFFFFFF;
-		const intensity = 300;       
+		const color = 0xFFFF00;
+		const intensity = 100;       
 		const light = new THREE.PointLight( color, intensity );
-		light.position.set( 40, 2, 4 );		
+		light.position.set( 3, 2, 4 );		
 		scene.add( light );
 	}
+
+
 	
+	
+        spotLight = new THREE.SpotLight( 0xff0000, 10, 0, 60 );
+        //spotLight.map = new THREE.TextureLoader().load( url );
+        
+        spotLight.decay = 0;
+        spotLight.shadow.mapSize.width = 1024;
+        spotLight.shadow.mapSize.height = 1024;
+        
+        spotLight.shadow.camera.near = 500;
+        spotLight.shadow.camera.far = 4000;
+        spotLight.shadow.camera.fov = 30;
+        
+        scene.add(spotLight.target);
+
+        scene.add( spotLight );
+        
+		spotLight.position.set( 10, 0, 60 );	
+        spotLight.decay = 0;
+        spotLight.penumbra = 1;
+        // spotLightHelper = new THREE.SpotLightHelper( spotLight );
+        spotLightHelper.decay = 0;
+        // spotLightHelper.shadow.mapSize.width = 1024;
+        // spotLightHelper.shadow.mapSize.height = 1024;
+        
+        // spotLightHelper.shadow.camera.near = 500;
+        // spotLightHelper.shadow.camera.far = 4000;
+        // spotLightHelper.shadow.camera.fov = 30;
+        spotLightHelper.position.set(10, 0, 60)
+        scene.add( spotLightHelper );
+        spotLightHelper.matrixAutoUpdate = true;
+        wisp = new THREE.PointLight( 0x00ffff, 100, 0, 0 );
+        wisp.position.set( 0, 20, 60 );
+        scene.add( wisp );
+	
+	
+    
+
     for (var c = 0; c < cubes.length; c++) {
         scene.add(cubes[c])
     }
@@ -249,6 +300,16 @@ function makeInstance( geometry, color, x , mtl=null, y=null, z=null) {
 
 }
 
+function animation() {
+    let time = Date.now()
+    const target = controls.target; 
+    controls.update(); 
+    controls2.target.set(target.x, target.y, target.z);
+    let t = (time / 2000 % 6) / 6; 
+    //const path.getPointAt(t); 
+    box.position.copy.position(); 
+    renderer.render(scene, camera)
+}
 function resizeRendererToDisplaySize( renderer ) {
 
     const canvas = renderer.domElement;
@@ -264,11 +325,18 @@ function resizeRendererToDisplaySize( renderer ) {
     return needResize;
 
 }
-
+let angle = 0;
 function render( time ) {
 
+    requestAnimationFrame( render );
     time *= 0.001;
-
+    
+    console.log("Check")
+    
+    
+    angle = time;
+    spotLight.intensity = Math.sin(time) * 100;
+    spotLight.target.position.x = 10*Math.sin(angle) + 10;
     if ( resizeRendererToDisplaySize( renderer ) ) {
 
         const canvas = renderer.domElement;
@@ -277,19 +345,19 @@ function render( time ) {
 
     }
 
-    // cubes.forEach( ( cube, ndx ) => {
-
-    //     const speed = 1 + ndx * .1;
-    //     const rot = time * speed;
-    //     cube.rotation.x = rot;
-    //     cube.rotation.y = rot;
-
-    // } );
-
     renderer.render( scene, camera );
-    requestAnimationFrame( render );
+
+    
+    let rot = time
+    wispObj.rotation.x = rot;
+    wispObj.rotation.y = rot;
+
+
 
 }
+    // cubes.forEach( ( cube, ndx ) => {
+
+    // } );
 
 
 
