@@ -38,7 +38,7 @@ const boxDepth = 1;
 
 const geometry = new THREE.BoxGeometry( boxWidth * 10, boxHeight * 10, boxDepth * 10);
 const circle = new THREE.SphereGeometry(20)
-const wispObj = new THREE.SphereGeometry(1)
+const wispObj = new THREE.SphereGeometry(.5)
 const plane = new THREE.BoxGeometry(20, 4, 20);
 const pentagon = new THREE.SphereGeometry();
 const knot = new THREE.TorusKnotGeometry();
@@ -163,7 +163,7 @@ const cubes = [
     makeInstance( flames, 0xbbff00, 62, null, -50, -62.5 ),
     makeInstance( flames, 0xbbff00, 57, null, -50, -75 ),
     makeInstance( fire, 0x836644, 55, null, -60, -65),
-    makeInstance( wispObj, 0x836644, 0, null, 20, 60)
+    makeInstance( wispObj, 0x836600, -5, null, 20, 60)
     
     //makeInstance( flames, 0xbb0000, -40, null, 0, -15 )
 ];
@@ -172,6 +172,9 @@ let spotlightTarget;
 
 let spotLightHelper;
 let wisp;
+let wisp2;
+let wisp3;
+let wisp4;
 function main() {
 	controls.update();
 
@@ -200,10 +203,7 @@ function main() {
     }
 
 	{
-		const color = 0x00FFFF;
-		const intensity = 1;		
-		const light = new THREE.AmbientLight( color, intensity );
-		light.position.set( - 1, 2, 4 );		
+		const light = new THREE.AmbientLight( 0x404040 );
 		scene.add( light );
 	}
 
@@ -212,7 +212,7 @@ function main() {
 		const intensity = 3;		
 		const light = new THREE.DirectionalLight( color, intensity );
 		light.position.set( - 1, 2, 4 );		
-		scene.add( light );
+		//scene.add( light );
 	}
 
     
@@ -222,13 +222,13 @@ function main() {
 		const intensity = 100;       
 		const light = new THREE.PointLight( color, intensity );
 		light.position.set( 3, 2, 4 );		
-		scene.add( light );
+		//scene.add( light );
 	}
 
 
 	
 	
-        spotLight = new THREE.SpotLight( 0xff0000, 10, 0, 60 );
+        spotLight = new THREE.SpotLight( 0xff0000, 1, 0, 60 );
         //spotLight.map = new THREE.TextureLoader().load( url );
         
         spotLight.decay = 0;
@@ -246,23 +246,40 @@ function main() {
 		spotLight.position.set( 10, 0, 60 );	
         spotLight.decay = 0;
         spotLight.penumbra = 1;
-        // spotLightHelper = new THREE.SpotLightHelper( spotLight );
-        spotLightHelper.decay = 0;
-        // spotLightHelper.shadow.mapSize.width = 1024;
-        // spotLightHelper.shadow.mapSize.height = 1024;
-        
-        // spotLightHelper.shadow.camera.near = 500;
-        // spotLightHelper.shadow.camera.far = 4000;
-        // spotLightHelper.shadow.camera.fov = 30;
+        spotLightHelper = new THREE.SpotLightHelper( spotLight );
         spotLightHelper.position.set(10, 0, 60)
-        scene.add( spotLightHelper );
+        //scene.add( spotLightHelper );
         spotLightHelper.matrixAutoUpdate = true;
-        wisp = new THREE.PointLight( 0x00ffff, 100, 0, 0 );
-        wisp.position.set( 0, 20, 60 );
+        wisp = new THREE.PointLight( 0xff0000, 100, 200, .5 );
+        wisp.position.set( -2.5, 22.5, 60 );
         scene.add( wisp );
+        
+        let wispHelper = new THREE.PointLightHelper(wisp)
+        //scene.add(wispHelper)
 	
-	
-    
+        
+        wisp2 = new THREE.PointLight( 0xffff00, 100, 200, 1 );
+        wisp2.position.set( -7.5, 17.5, 60 );
+        
+        scene.add(wisp2)
+        let wisp2Helper = new THREE.PointLightHelper(wisp2)
+        //scene.add(wisp2Helper)
+
+        
+        wisp3 = new THREE.PointLight( 0xff8300, 100, 200, .5 );
+        wisp3.position.set( -5, 22.5, 55 );
+        
+        scene.add(wisp3)
+        let wisp3Helper = new THREE.PointLightHelper(wisp3)
+        //scene.add(wisp3Helper)
+
+        
+        wisp4 = new THREE.PointLight( 0xff8300, 100, 200, .5 );
+        wisp4.position.set( -5, 19.5, 65 );
+        
+        scene.add(wisp4)
+        let wisp4Helper = new THREE.PointLightHelper(wisp4)
+        //scene.add(wisp4Helper)
 
     for (var c = 0; c < cubes.length; c++) {
         scene.add(cubes[c])
@@ -348,9 +365,6 @@ function render( time ) {
     renderer.render( scene, camera );
 
     
-    let rot = time
-    wispObj.rotation.x = rot;
-    wispObj.rotation.y = rot;
 
 
 
